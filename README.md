@@ -45,7 +45,7 @@ PYTHONPATH=src python3 scripts/run_experiment.py \
 3. Check:
 
 - `data/output/` for time-scaled WAV files
-- `figures/` for waveform and spectrogram comparisons
+- `figures/` for combined waveform and spectrogram comparison figures
 
 ## Using Your Own Audio
 

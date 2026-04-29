@@ -3,7 +3,7 @@ from __future__ import annotations
 import argparse
 from pathlib import Path
 
-from tsm.analysis import save_spectrogram_comparison, save_waveform_comparison
+from tsm.analysis import save_spectrogram_comparisons, save_waveform_comparisons
 from tsm.audio import read_wav_mono, write_wav_mono
 from tsm.ola import ola_time_scale
 
@@ -42,6 +42,7 @@ def main() -> None:
     print(f"Sample rate: {sample_rate} Hz")
     print(f"Samples: {len(signal)}")
 
+    variants = []
     for factor in args.factors:
         modified = ola_time_scale(
             signal,
@@ -49,31 +50,34 @@ def main() -> None:
             frame_length=args.frame_length,
             analysis_hop=args.analysis_hop,
         )
+        variants.append((factor, modified))
 
         factor_tag = str(factor).replace(".", "p")
         wav_path = output_dir / f"{input_stem}_ola_{factor_tag}x.wav"
-        waveform_path = figure_dir / f"{input_stem}_waveform_{factor_tag}x.png"
-        spectrogram_path = figure_dir / f"{input_stem}_spectrogram_{factor_tag}x.png"
 
         write_wav_mono(wav_path, sample_rate, modified)
-        save_waveform_comparison(
-            signal,
-            modified,
-            sample_rate,
-            waveform_path,
-            title=f"OLA waveform comparison ({factor}x speed)",
-        )
-        save_spectrogram_comparison(
-            signal,
-            modified,
-            sample_rate,
-            spectrogram_path,
-            title=f"OLA spectrogram comparison ({factor}x speed)",
-        )
-
         print(f"Saved {wav_path}")
-        print(f"Saved {waveform_path}")
-        print(f"Saved {spectrogram_path}")
+
+    waveform_path = figure_dir / f"{input_stem}_waveform_comparison.png"
+    spectrogram_path = figure_dir / f"{input_stem}_spectrogram_comparison.png"
+
+    save_waveform_comparisons(
+        signal,
+        variants,
+        sample_rate,
+        waveform_path,
+        title="OLA waveform comparison",
+    )
+    save_spectrogram_comparisons(
+        signal,
+        variants,
+        sample_rate,
+        spectrogram_path,
+        title="OLA spectrogram comparison",
+    )
+
+    print(f"Saved {waveform_path}")
+    print(f"Saved {spectrogram_path}")
 
 
 if __name__ == "__main__":
